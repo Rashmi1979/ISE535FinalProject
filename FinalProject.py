@@ -3,22 +3,23 @@ import dash_table
 import pandas as pd
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
+import plotly.graph_objs as go
 from dash import Input, Output, State, html
+import matplotlib.pyplot as plt 
+import plotly.express as px
+
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP],suppress_callback_exceptions=True)
 
-# make a reuseable navitem for the different examples
 nav_item1 = dbc.NavItem(dbc.NavLink("About", href="/about"))
-nav_item2 = dbc.NavItem(dbc.NavLink("Data Visualization", href="/visual"))
-nav_item3 = dbc.NavItem(dbc.NavLink("Data Modeling", href="/model"))
+nav_item2 = dbc.NavItem(dbc.NavLink("Data Exploration", href="/explore"))
+nav_item3 = dbc.NavItem(dbc.NavLink("Data Visualization", href="/visual"))
+nav_item4 = dbc.NavItem(dbc.NavLink("Data Modeling", href="/model"))
 
-
-# here's how you can recreate the same thing using Navbar
-# (see also required callback at the end of the file)
 navbar = dbc.Navbar(
     dbc.Container(
         [   dbc.NavbarBrand("PIMA Indian Diabetes Data Anlaysis", href="#"),
-            dbc.Nav([nav_item1,nav_item2,nav_item3], className="ms-auto", navbar=True),
+            dbc.Nav([nav_item1,nav_item2,nav_item3, nav_item4], className="ms-auto", navbar=True),
         ]
     ), className="mb-5",sticky="top",
 )
@@ -34,58 +35,165 @@ aboutPage = html.Div([
     )
 
 # Read the file
-# Left bar
-# Get Dropdown for filter
-# Get all columns
-# Right side display table with pagination
 df = pd.read_csv('diabetes.csv')
 
 PAGE_SIZE = 10
-
-visualizationPage =  html.Div([
-            html.H4("Data Visualization ", className="card-title"),
+explorePage =  html.Div([
+            html.H4("Data Exploration ", className="card-title"),
+            html.P("Below data table supports following features: "),
+            html.Ul([
+                html.Li("Sort values for any column, it support multi column sort as well"),
+                html.Li("Filter data by providing condition for required column/s"),
+                html.Li("Delete columns or rows"),
+                html.Li("Edit cell value"),
+                html.Li("Default record size per page and page navigation"),
+                html.Li("Export filtered to CSV using Export button"),
+            ]),
+    
             dash_table.DataTable(
-                id='table-multicol-sorting',
-                columns=[
-                    {"name": i, "id": i} for i in (df.columns)
-                ],
-                page_current=0,
-                page_size=PAGE_SIZE,
-                page_action='custom',
-
-                sort_action='custom',
-                sort_mode='multi',
-                sort_by=[]
+                id='datatable-interactivity',
+                columns=[ {"name": i, "id": i, "deletable": True, "selectable": True} for i in df.columns],
+                data=df.to_dict('records'),
+                editable=True,
+                filter_action="native",
+                sort_action="native",
+                sort_mode="multi",
+                column_selectable="single",
+                row_selectable="multi",
+                row_deletable=True,
+                selected_columns=[],
+                selected_rows=[],
+                page_action="native",
+                page_current= 0,
+                page_size= PAGE_SIZE,
+                export_format="csv"
             ),
+            html.Div(id='datatable-interactivity-container'),
         ],
         style={"width": "100%"},
 )
 
 @app.callback(
-    Output('table-multicol-sorting', "data"),
-    Input('table-multicol-sorting', "page_current"),
-    Input('table-multicol-sorting', "page_size"),
-    Input('table-multicol-sorting', "sort_by"))
-def update_table(page_current, page_size, sort_by):
-    print(sort_by)
-    if len(sort_by):
-        dff = df.sort_values(
-            [col['column_id'] for col in sort_by],
-            ascending=[
-                col['direction'] == 'asc'
-                for col in sort_by
-            ],
-            inplace=False
-        )
-    else:
-        # No sort is applied
-        dff = df
-
-    return dff.iloc[
-        page_current*page_size:(page_current+ 1)*page_size
-    ].to_dict('records')
+    Output('datatable-interactivity', 'style_data_conditional'),
+    Input('datatable-interactivity', 'selected_columns')
+)
+def update_styles(selected_columns):
+    return [{
+        'if': { 'column_id': i },
+        'background_color': '#D2F3FF'
+    } for i in selected_columns]
     
 
+
+
+corr = df.corr()    
+columnValues = df.columns  
+df['Outcome'] = df['Outcome'].astype('category')
+
+visualPage =  html.Div([
+            html.H4("Data Visualization ", className="card-title"),
+            html.P("..... summaries below... "),
+    
+            html.H5("Correlation Matrix"),
+            dcc.Graph(
+                id='heatMap',
+                figure={
+                    'data' : [
+                        go.Heatmap(
+                            z=corr.values,
+                            x=corr.columns.tolist(),
+                            y=corr.index.tolist(),
+                            colorscale='blues'
+                        )
+                    ],
+                    'layout' : go.Layout(
+                        title = "Data correlation matrix",
+                        xaxis = dict(ticks=''),
+                        yaxis = dict(ticks='',automargin=True)
+                    )
+                    
+                }
+            ),
+            html.Hr(),
+            html.Div([
+                html.H5("Histograms"),
+                dcc.Dropdown(
+                    id='xaxis',
+                    options=[{'label': i.title(), 'value': i} for i in columnValues],
+                    value=columnValues[0],
+                )
+            ], style={'width': '48%'}),
+            
+            dcc.Graph(id='histograms'),
+            html.Hr(),
+            html.Div([
+                html.H5("Scattered Plots"),
+                dbc.Row(
+                [
+                    dbc.Col("X Axis"),
+                    dbc.Col("Y Axis"),
+                ]),
+   
+                dbc.Row(
+                [
+                    dbc.Col( dcc.Dropdown(
+                                id='xaxis-column',
+                                options=[{'label': i, 'value': i} for i in columnValues],
+                                value=columnValues[0]
+                             ),
+                    ),
+                    dbc.Col(dcc.Dropdown(
+                                id='yaxis-column',
+                                options=[{'label': i, 'value': i} for i in columnValues],
+                                value=columnValues[1]
+                            ),
+                    ),
+                ]),
+   
+            ]),
+    
+            dcc.Graph(id='scattered-plots'),
+     
+    ]
+)
+
+
+@app.callback(
+    Output('histograms', 'figure'),
+    [Input('xaxis', 'value')])
+def update_graph(xaxis_name):
+    return  px.histogram(df,
+            x = xaxis_name,
+            color="Outcome")
+    
+      
+@app.callback(
+    Output('scattered-plots', 'figure'),
+    [Input('xaxis-column', 'value'),
+     Input('yaxis-column', 'value')])
+def update_sc_graph(xaxis_name, yaxis_name):
+    return px.scatter(df,
+                x= xaxis_name,
+                y= yaxis_name,
+                color="Outcome",
+                color_continuous_scale = px.colors.sequential.Inferno)
+      
+
+modelPage = html.Div([
+            html.H4("Data Modeling", className="card-title"),
+            html.P(".....  below... "),
+    
+    
+    
+    
+        ]
+)
+    
+    
+    
+    
+    
+    
 app.layout = html.Div(
     [
         dcc.Location(id="url", pathname="/about"), navbar,
@@ -93,13 +201,16 @@ app.layout = html.Div(
     ]
 )
 
-
 @app.callback(Output("content", "children"), [Input("url", "pathname")])
 def display_page(pathname):
     if pathname == "/about":
         return aboutPage
+    if pathname == "/explore":
+        return explorePage
     if pathname == "/visual":
-        return visualizationPage
+        return visualPage
+    if pathname == "/model":
+        return modelPage
     # if not recognised, return 404 message
     return html.P("404 - page not found")
 
