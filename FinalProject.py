@@ -26,8 +26,7 @@ navbar = dbc.Navbar(
 
 aboutPage = html.Div([
                 html.H4("About this Project", className="card-title"),
-                html.P("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
-                    className="card-text",
+                html.P("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum", className="card-text",
                 )
             ]
             ,
@@ -82,8 +81,9 @@ def update_styles(selected_columns):
         'if': { 'column_id': i },
         'background_color': '#D2F3FF'
     } for i in selected_columns]
-    
 
+
+############   VISUAL PAGE STARTING HERE ##############
 
 
 corr = df.corr()    
@@ -111,7 +111,6 @@ visualPage =  html.Div([
                         xaxis = dict(ticks=''),
                         yaxis = dict(ticks='',automargin=True)
                     )
-                    
                 }
             ),
             html.Hr(),
@@ -157,7 +156,6 @@ visualPage =  html.Div([
     ]
 )
 
-
 @app.callback(
     Output('histograms', 'figure'),
     [Input('xaxis', 'value')])
@@ -166,7 +164,6 @@ def update_graph(xaxis_name):
             x = xaxis_name,
             color="Outcome")
     
-      
 @app.callback(
     Output('scattered-plots', 'figure'),
     [Input('xaxis-column', 'value'),
@@ -178,13 +175,30 @@ def update_sc_graph(xaxis_name, yaxis_name):
                 color="Outcome",
                 color_continuous_scale = px.colors.sequential.Inferno)
       
+    
+############   MODEL PAGE STARTING HERE ##############
 
+#df = df[df.BMI==0]
+#median_bmi = df['BMI'].median()
+#df['BMI'] = df['BMI'].replace(to_replace=0, value=median_bmi)
+
+#mBP = df['BloodPressure'].median()
+#df['BloodPressure'] = df['BloodPressure'].replace(to_replace=0, value=mBP)
+
+#mSkin = df['SkinThickness'].median()
+#df['SkinThickness'] = df['SkinThickness'].replace(to_replace=0, value=mSkin)
+
+#mGlucose = df['Glucose'].median()
+#df['Glucose'] = df['Glucose'].replace(to_replace=0, value=mGlucose)
+
+
+#################
+
+
+    
 modelPage = html.Div([
             html.H4("Data Modeling", className="card-title"),
             html.P(".....  below... "),
-    
-    
-    
     
         ]
 )
