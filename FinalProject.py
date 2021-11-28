@@ -199,11 +199,39 @@ def update_sc_graph(xaxis_name, yaxis_name):
 modelPage = html.Div([
             html.H4("Data Modeling", className="card-title"),
             html.P(".....  below... "),
+            dbc.Row(
+                [
+                    dbc.Col( 
+                        html.Div([
+                             html.B("Select % for training dataset:"),
+                             dcc.Input(id='my-id', value='70', type='text'),
+                             html.Hr(),
+                             html.B("Select predictors from list below:"),
+                             dcc.Checklist(
+                                id='predictors',
+                                options=[{'label': i, 'value': i} for i in columnValues],
+                                style={ 'width': '100%'},
+                                labelStyle={'float': 'left', 'clear': 'left'}
+                            )
+
+                        ]), width=4,style={'backgroundColor':'lightgray', "padding":"10px"}
+                    ),
+                    dbc.Col(
+                        html.Div([
+                           html.Span(id='my-div')
+                        ]), width=8  
+                    ),
+                ]),
     
         ]
 )
     
-    
+@app.callback(
+    Output(component_id='my-div', component_property='children'),
+    [Input(component_id='my-id', component_property='value')]
+)
+def update_output_div(input_value):
+    return 'Train Dataset % = {}'.format(input_value)    
     
     
     
