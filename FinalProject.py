@@ -225,7 +225,7 @@ modelPage = html.Div([
                                 options=[{'label': i, 'value': i} for i in predictors],
                                 style={ 'width': '100%'},
                                 labelStyle={'float': 'left', 'clear': 'left'},
-                                value = ['Glucose', 'BloodPressure']
+                                value = ['Glucose', 'BMI']
                             )
 
                         ]), width=4,style={'backgroundColor':'lightgray', "padding":"10px"}
