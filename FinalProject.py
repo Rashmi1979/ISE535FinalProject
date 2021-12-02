@@ -9,7 +9,6 @@ from dash import Input, Output, State, html
 import matplotlib.pyplot as plt 
 import plotly.express as px
 from sklearn.model_selection import train_test_split
-import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
@@ -38,8 +37,29 @@ navbar = dbc.Navbar(
 
 aboutPage = html.Div([
                 html.H4("About this Project", className="card-title"),
-                html.P("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum", className="card-text",
-                )
+                html.B("Introduction: "),
+                html.P("The Pima are a group of Native Americans living in Arizona. In recent years due change in life style and food habits - aregetting dignosed more with Diabetes than that of previous years. ", className="card-text"),
+                html.B("Project Goals"),
+                html.P("Primary goal of this project is to use various machine learning models to predict if patient has diabetes or not. Data exploration, Data Visualization and Data Modeling are essential steps to analyse, clean prepare and model the data for prediction. ", className="card-text"),
+                html.B("Link to the dataset: "),
+                html.P("https://www.kaggle.com/uciml/pima-indians-diabetes-database", className="card-text"),
+                html.B("Dataset details: "),
+                html.P("The datasets consist of several medical predictor (independent) variables and one target (dependent) variable, Outcome. Independent variables include the number of pregnancies the patient has had, their BMI, insulin level, age, and so on.", className="card-text"),
+                html.Ul([
+                                html.Li("Pregnancies: Number of times pregnant"),
+                                html.Li("Glucose: Plasma glucose concentration a 2 hours in an oral glucose tolerance test"),
+                                html.Li("BloodPressure: Diastolic blood pressure (mm Hg)"),
+                                html.Li("SkinThickness: Triceps skin fold thickness (mm)"),
+                                html.Li("Insulin: 2-Hour serum insulin (mu U/ml)"),
+                                html.Li("BMI: Body mass index (weight in kg/(height in m)^2)"),
+                                html.Li("DiabetesPedigreeFunction: Diabetes pedigree function"),
+                                html.Li("Age: Age(years)"),
+                                html.Li("Outcome: Class variable (0 or 1) 268 of 768 are 1, the others are 0"),
+                    
+                    
+                                
+                            ]) 
+    
             ]
             ,
             style={"width": "100%"},
