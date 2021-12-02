@@ -1,12 +1,24 @@
 import dash
 import dash_table
 import pandas as pd
+import numpy as np
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import plotly.graph_objs as go
 from dash import Input, Output, State, html
 import matplotlib.pyplot as plt 
 import plotly.express as px
+from sklearn.model_selection import train_test_split
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score
 
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP],suppress_callback_exceptions=True)
@@ -193,9 +205,10 @@ def update_sc_graph(xaxis_name, yaxis_name):
 
 
 #################
+newDF = df.drop(columns=['Outcome'])
+predictors = newDF.columns
+ 
 
-
-    
 modelPage = html.Div([
             html.H4("Data Modeling", className="card-title"),
             html.P(".....  below... "),
@@ -209,20 +222,36 @@ modelPage = html.Div([
                              html.B("Select predictors from list below:"),
                              dcc.Checklist(
                                 id='predictors',
-                                options=[{'label': i, 'value': i} for i in columnValues],
+                                options=[{'label': i, 'value': i} for i in predictors],
                                 style={ 'width': '100%'},
-                                labelStyle={'float': 'left', 'clear': 'left'}
+                                labelStyle={'float': 'left', 'clear': 'left'},
+                                value = ['Glucose', 'BloodPressure']
                             )
 
                         ]), width=4,style={'backgroundColor':'lightgray', "padding":"10px"}
                     ),
                     dbc.Col(
                         html.Div([
-                           html.Span(id='my-div')
+                            html.Hr(),
+                            html.P(id='my-div'),
+                            html.Hr(),
+                            html.P(id='pre-div'),
+                            html.Hr(),
+                            dbc.Button("Run Models", id="run_m_button", className="me-2",n_clicks=0),
+                            dcc.Graph(id="graph"),
+                            html.Ul([
+                                html.Li("KNN: KNeighbors Classifier"),
+                                html.Li("SVC: Support Vector Classfier"),
+                                html.Li("LR: Logistic Regression"),
+                                html.Li("DT: Decision Tree Classifier"),
+                                html.Li("GNB: Gaussian NB"),
+                                html.Li("RF: Random Forest Classifier"),
+                                html.Li("GB: Gradient Booster Classifier"),
+                                
+                            ])    
                         ]), width=8  
                     ),
                 ]),
-    
         ]
 )
     
@@ -234,7 +263,63 @@ def update_output_div(input_value):
     return 'Train Dataset % = {}'.format(input_value)    
     
     
+@app.callback(
+    Output(component_id='pre-div', component_property='children'),
+    [Input(component_id='predictors', component_property='value')]
+)
+def update_predictor_div(input_value):
+    return 'Selected Predictors = {}'.format(input_value)    
+ 
     
+    
+        
+@app.callback(
+     #Output("test-out", "children"), 
+    Output('graph','figure'),
+    [Input("run_m_button", "n_clicks"),
+     State('my-id', 'value'),
+     State('predictors','value')
+    ]
+)
+def on_button_click(n,trainsplit,pred):
+    testsplit = (100 - int(trainsplit))/100   
+    df_mod = df[(df.BloodPressure != 0) & (df.BMI != 0) & (df.Glucose != 0)]
+    
+    X = df_mod[pred]
+    y = df_mod.Outcome
+    
+    models = []
+    models.append(('KNN', KNeighborsClassifier()))
+    models.append(('SVC', SVC()))
+    models.append(('LR', LogisticRegression()))
+    models.append(('DT', DecisionTreeClassifier()))
+    models.append(('GNB', GaussianNB()))
+    models.append(('RF', RandomForestClassifier()))
+    models.append(('GB', GradientBoostingClassifier()))
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size= testsplit, stratify = df_mod.Outcome, random_state=0)
+    names = []
+    scores = []
+    for name, model in models:
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        scores.append(accuracy_score(y_test, y_pred))
+        names.append(name)
+    tr_split = pd.DataFrame({'Classifier': names, 'Score': scores})
+
+    colors = ['lightslategray',] * 7
+    highRow = tr_split['Score'].idxmax()
+    colors[highRow] = 'crimson'
+
+    
+    
+#    fig = px.bar(tr_split, x = 'Classifier', y = 'Score', text='Score', marker_color=colors)
+    fig = go.Figure(data=[go.Bar( x = tr_split.Classifier, y = tr_split.Score,text= tr_split.Score,
+    marker_color=colors # marker color can be a single color value or an iterable
+)])
+    
+    return fig
+
     
 app.layout = html.Div(
     [
