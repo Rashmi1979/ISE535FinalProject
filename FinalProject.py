@@ -6,7 +6,6 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import plotly.graph_objs as go
 from dash import Input, Output, State, html
-import matplotlib.pyplot as plt 
 import plotly.express as px
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -38,27 +37,35 @@ navbar = dbc.Navbar(
 aboutPage = html.Div([
                 html.H4("About this Project", className="card-title"),
                 html.B("Introduction: "),
-                html.P("The Pima are a group of Native Americans living in Arizona. In recent years due change in life style and food habits - aregetting dignosed more with Diabetes than that of previous years. ", className="card-text"),
-                html.B("Project Goals"),
-                html.P("Primary goal of this project is to use various machine learning models to predict if patient has diabetes or not. Data exploration, Data Visualization and Data Modeling are essential steps to analyse, clean prepare and model the data for prediction. ", className="card-text"),
+                html.P("The PIMA are a group of Native Americans living in Arizona. In recent years due change in life style and food habits, they are getting dignosed more with Diabetes than that of previous years. ", className="card-text"),
+                html.B("Project Goals:"),
+                html.P("Primary goal of this project is to use various machine learning models to predict if patient has diabetes or not. Data exploration, Data Visualization and Data Modeling are essential steps to analyse, clean, prepare and model the data for prediction. ", className="card-text"),
                 html.B("Link to the dataset: "),
                 html.P("https://www.kaggle.com/uciml/pima-indians-diabetes-database", className="card-text"),
                 html.B("Dataset details: "),
-                html.P("The datasets consist of several medical predictor (independent) variables and one target (dependent) variable, Outcome. Independent variables include the number of pregnancies the patient has had, their BMI, insulin level, age, and so on.", className="card-text"),
+                html.P("All patients here are females. The datasets consist of several medical predictor (independent) variables and one target (dependent) variable, Outcome. Independent variables include the number of pregnancies the patient has had, their BMI, insulin level, age, and so on.", className="card-text"),
                 html.Ul([
-                                html.Li("Pregnancies: Number of times pregnant"),
-                                html.Li("Glucose: Plasma glucose concentration a 2 hours in an oral glucose tolerance test"),
-                                html.Li("BloodPressure: Diastolic blood pressure (mm Hg)"),
-                                html.Li("SkinThickness: Triceps skin fold thickness (mm)"),
-                                html.Li("Insulin: 2-Hour serum insulin (mu U/ml)"),
-                                html.Li("BMI: Body mass index (weight in kg/(height in m)^2)"),
-                                html.Li("DiabetesPedigreeFunction: Diabetes pedigree function"),
-                                html.Li("Age: Age(years)"),
-                                html.Li("Outcome: Class variable (0 or 1) 268 of 768 are 1, the others are 0"),
-                    
+                    html.Li("Pregnancies: Number of times pregnant"),
+                    html.Li("Glucose: Plasma glucose concentration a 2 hours in an oral glucose tolerance test"),
+                    html.Li("BloodPressure: Diastolic blood pressure (mm Hg)"),
+                    html.Li("SkinThickness: Triceps skin fold thickness (mm)"),
+                    html.Li("Insulin: 2-Hour serum insulin (mu U/ml)"),
+                    html.Li("BMI: Body mass index (weight in kg/(height in m)^2)"),
+                    html.Li("DiabetesPedigreeFunction: Diabetes pedigree function"),
+                    html.Li("Age: Age(years)"),
+                    html.Li("Outcome: Class variable (0 or 1) 268 of 768 are 1, the others are 0"),
+
                     
                                 
-                            ]) 
+                            ]),
+                html.B("Libraries used: "),
+                html.Ul([
+                    html.Li("numpy"),
+                    html.Li("pandas"),
+                    html.Li("dash"),
+                    html.Li("plotly"),
+                    html.Li("sklearn"),
+                ]) 
     
             ]
             ,
@@ -71,6 +78,7 @@ df = pd.read_csv('diabetes.csv')
 PAGE_SIZE = 10
 explorePage =  html.Div([
             html.H4("Data Exploration ", className="card-title"),
+            html.P("Data exploration step provides more information about data, based on which we can decide if we need to data data cleaning or not."),
             html.P("Below data table supports following features: "),
             html.Ul([
                 html.Li("Sort values for any column, it support multi column sort as well"),
@@ -78,7 +86,7 @@ explorePage =  html.Div([
                 html.Li("Delete columns or rows"),
                 html.Li("Edit cell value"),
                 html.Li("Default record size per page and page navigation"),
-                html.Li("Export filtered to CSV using Export button"),
+                html.Li("Export filtered data to CSV using Export button"),
             ]),
     
             dash_table.DataTable(
@@ -124,7 +132,7 @@ df['Outcome'] = df['Outcome'].astype('category')
 
 visualPage =  html.Div([
             html.H4("Data Visualization ", className="card-title"),
-            html.P("..... summaries below... "),
+            html.P("Data Visualization enables data analysts to better understand and visually identify anomalies and relationships between data items"),
     
             html.H5("Correlation Matrix"),
             dcc.Graph(
@@ -210,28 +218,12 @@ def update_sc_graph(xaxis_name, yaxis_name):
     
 ############   MODEL PAGE STARTING HERE ##############
 
-#df = df[df.BMI==0]
-#median_bmi = df['BMI'].median()
-#df['BMI'] = df['BMI'].replace(to_replace=0, value=median_bmi)
-
-#mBP = df['BloodPressure'].median()
-#df['BloodPressure'] = df['BloodPressure'].replace(to_replace=0, value=mBP)
-
-#mSkin = df['SkinThickness'].median()
-#df['SkinThickness'] = df['SkinThickness'].replace(to_replace=0, value=mSkin)
-
-#mGlucose = df['Glucose'].median()
-#df['Glucose'] = df['Glucose'].replace(to_replace=0, value=mGlucose)
-
-
-#################
 newDF = df.drop(columns=['Outcome'])
 predictors = newDF.columns
  
 
 modelPage = html.Div([
             html.H4("Data Modeling", className="card-title"),
-            html.P(".....  below... "),
             dbc.Row(
                 [
                     dbc.Col( 
